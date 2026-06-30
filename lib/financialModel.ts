@@ -94,7 +94,7 @@ export const PROFILE: Profile = {
     },
   ],
   holdings: [
-    { ticker: "VTI", name: "Total US Market", value: 30500, weight: 41, ret1y: 14.2, kind: "etf" },
+    { ticker: "VTI", name: "Total US Market", value: 30500, weight: 42, ret1y: 14.2, kind: "etf" },
     { ticker: "VXUS", name: "Intl Markets", value: 13400, weight: 18, ret1y: 9.1, kind: "etf" },
     { ticker: "BND", name: "Total Bond", value: 8900, weight: 12, ret1y: 3.4, kind: "bond" },
     { ticker: "AAPL", name: "Apple", value: 6700, weight: 9, ret1y: 21.5, kind: "stock" },

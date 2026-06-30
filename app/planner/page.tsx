@@ -19,6 +19,8 @@ const SUGGESTIONS = [
   "Can I afford a house in 3 years?",
   "Am I saving enough?",
   "How should I invest $500 a month?",
+  "How's my financial health?",
+  "Where can I cut spending?",
 ];
 
 const ONBOARD = "I make $7,200/mo, want to buy a home in 4 years, and have some credit card debt.";

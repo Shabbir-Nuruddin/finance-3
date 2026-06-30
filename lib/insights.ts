@@ -248,6 +248,46 @@ export function localFallbackAnswer(question: string, p: Profile): string {
   const q = question.toLowerCase();
   const fcf = freeCashFlow(p);
 
+  // Onboarding-style intro ("I make $X, want to…") — synthesize a holistic starter plan.
+  if (
+    q.includes("i make") ||
+    q.includes("i earn") ||
+    q.includes("/mo") ||
+    q.includes("a month") ||
+    q.includes("take home") ||
+    q.includes("my income")
+  ) {
+    const cc = p.debts.find((d) => d.name === "Credit Card");
+    const home = p.goals.find((g) => g.id === "home");
+    const interest = cc ? Math.round((cc.balance * cc.apr) / 100) : 0;
+    return `Great snapshot — here's your starting plan. You're saving ${pct(
+      savingsRate(p),
+    )} of your income, which is a strong base. Three priorities: (1) clear your ${
+      cc
+        ? `${money(cc.balance)} credit card at ${cc.apr}% — it quietly costs ~${money(interest)}/yr`
+        : "highest-rate debt"
+    }; (2) grow your emergency fund from ${emergencyMonths(p).toFixed(
+      1,
+    )} to 6 months; (3) keep funding your home down payment${
+      home ? ` (${money(home.current)} of ${money(home.target)}, ~on pace at ${money(home.monthly)}/mo)` : ""
+    }. Ask me about any one of these to go deeper.`;
+  }
+
+  // Overall standing / health score.
+  if (
+    q.includes("score") ||
+    q.includes("health") ||
+    q.includes("how am i doing") ||
+    q.includes("net worth") ||
+    q.includes("overall")
+  ) {
+    return `Overall you're in solid shape: net worth ${money(
+      netWorth(p),
+    )} and a ${pct(savingsRate(p))} savings rate. Your score is held back by two things — an emergency fund at only ${emergencyMonths(
+      p,
+    ).toFixed(1)} months (aim for 6) and high credit-card utilization. Knock those out and your financial health jumps. The Health tab breaks down every factor.`;
+  }
+
   if (q.includes("debt") || q.includes("credit") || q.includes("loan")) {
     const cc = p.debts.find((d) => d.name === "Credit Card");
     return `Tackle debt highest-APR first (the "avalanche" method). Your credit card${
@@ -256,7 +296,14 @@ export function localFallbackAnswer(question: string, p: Profile): string {
       fcf,
     )}/mo of free cash flow, an extra ${money(300)}/mo could clear the card in under a year.`;
   }
-  if (q.includes("save") || q.includes("emergency")) {
+  if (
+    q.includes("save") ||
+    q.includes("saving") ||
+    q.includes("emergency") ||
+    q.includes("enough") ||
+    q.includes("cushion") ||
+    q.includes("rainy")
+  ) {
     return `Your emergency fund covers ${emergencyMonths(p).toFixed(
       1,
     )} months — aim for 6. Automating ${money(

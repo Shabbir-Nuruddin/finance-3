@@ -1,6 +1,8 @@
 "use client";
 
 import { Insight } from "@/lib/insights";
+import { useUI } from "@/lib/ui";
+import { useFinance } from "@/lib/store";
 import TrustBadge from "./TrustBadge";
 
 const TONE: Record<
@@ -15,6 +17,26 @@ const TONE: Record<
 
 export default function AlertCard({ insight }: { insight: Insight }) {
   const tone = TONE[insight.severity];
+  const openWhatIf = useUI((s) => s.openWhatIf);
+  const setScenario = useFinance((s) => s.setScenario);
+
+  // Each proactive alert's button takes a real action: it opens the What-If
+  // simulator pre-loaded with the relevant change so the impact is visible live.
+  function handleAction() {
+    switch (insight.id) {
+      case "creditcard":
+        setScenario({ payoffCreditCard: true });
+        break;
+      case "overspend":
+        setScenario({ spendingChangePct: -10 });
+        break;
+      case "idlecash":
+        setScenario({ extraInvest: 500 });
+        break;
+    }
+    openWhatIf();
+  }
+
   return (
     <div
       className="card p-4"
@@ -41,10 +63,11 @@ export default function AlertCard({ insight }: { insight: Insight }) {
             {insight.body}
           </p>
           <button
-            className="mt-2.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold"
+            onClick={handleAction}
+            className="mt-2.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold active:scale-95 transition"
             style={{ background: tone.ring, color: "#06080d" }}
           >
-            {insight.action}
+            {insight.action} →
           </button>
           <TrustBadge trust={insight.trust} />
         </div>
