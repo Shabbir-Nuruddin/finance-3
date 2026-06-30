@@ -1,29 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  /* Surfaces */
-  --bg: #070A12;
-  --bg-2: #0B0F1A;
-  --surface: #121826;
-  --surface-2: #161D2E;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.12);
+  /* Warm, light "private wealth" palette — beige / soft brown / white / gray */
+  --bg: #E9E1D6;          /* page backdrop behind the phone */
+  --phone-bg: #FBF8F3;    /* warm off-white app canvas */
+  --surface: #FFFFFF;     /* cards */
+  --surface-2: #F3ECE1;   /* beige inset / track */
+  --border: rgba(74, 60, 44, 0.12);
+  --border-strong: rgba(74, 60, 44, 0.22);
+  --shadow: 0 1px 2px rgba(60, 46, 30, 0.04), 0 6px 20px rgba(60, 46, 30, 0.06);
 
   /* Text */
-  --text: #F4F7FB;
-  --text-muted: #8A93A6;
-  --text-dim: #5C6478;
+  --text: #2B2620;
+  --text-muted: #8A8073;
+  --text-dim: #B4AA9A;
 
-  /* Brand accents */
-  --accent: #2DD4A7;       /* money / positive — teal-emerald */
-  --accent-soft: rgba(45, 212, 167, 0.14);
-  --ai: #8B7CF6;           /* AI / intelligence — violet */
-  --ai-soft: rgba(139, 124, 246, 0.16);
-  --info: #4DA6FF;
-  --warn: #F5A524;
-  --warn-soft: rgba(245, 165, 36, 0.15);
-  --danger: #F4567B;
-  --danger-soft: rgba(244, 86, 123, 0.15);
+  /* Brand — warm bronze / caramel (wealthy, guiding) */
+  --accent: #A6794B;
+  --accent-deep: #8A6135;
+  --accent-soft: rgba(166, 121, 75, 0.14);
+
+  /* Liam / AI uses the same bronze brand for a unified, calm look */
+  --ai: #A6794B;
+  --ai-soft: rgba(166, 121, 75, 0.14);
+
+  /* Semantic — muted, earthy so they sit on the warm palette */
+  --pos: #5E8C6A;
+  --pos-soft: rgba(94, 140, 106, 0.16);
+  --info: #5B7C99;
+  --info-soft: rgba(91, 124, 153, 0.16);
+  --warn: #C29A3B;
+  --warn-soft: rgba(194, 154, 59, 0.18);
+  --danger: #BE6A4F;
+  --danger-soft: rgba(190, 106, 79, 0.16);
+
+  --brand-grad: linear-gradient(135deg, #B5854F, #8A6135);
 }
 
 @theme inline {
@@ -55,7 +66,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Desktop: dark studio backdrop behind the phone */
+/* Light studio backdrop behind the phone */
 .studio {
   min-height: 100dvh;
   width: 100%;
@@ -63,8 +74,8 @@ body {
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(900px 600px at 50% -10%, rgba(139, 124, 246, 0.12), transparent 60%),
-    radial-gradient(700px 500px at 100% 100%, rgba(45, 212, 167, 0.08), transparent 60%),
+    radial-gradient(900px 600px at 50% -10%, rgba(166, 121, 75, 0.16), transparent 60%),
+    radial-gradient(700px 500px at 100% 110%, rgba(166, 121, 75, 0.10), transparent 60%),
     var(--bg);
 }
 
@@ -81,7 +92,7 @@ body {
   max-width: 430px;
   height: 100dvh;
   max-height: 932px;
-  background: var(--bg-2);
+  background: var(--phone-bg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -90,12 +101,12 @@ body {
 @media (min-width: 480px) {
   .phone {
     height: 900px;
-    border-radius: 44px;
-    border: 1px solid var(--border-strong);
+    border-radius: 46px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
     box-shadow:
-      0 0 0 10px #05070C,
-      0 0 0 11px rgba(255, 255, 255, 0.06),
-      0 40px 120px rgba(0, 0, 0, 0.7);
+      0 0 0 10px #1c1814,
+      0 0 0 12px rgba(0, 0, 0, 0.12),
+      0 40px 110px rgba(40, 30, 20, 0.45);
   }
 }
 
@@ -114,12 +125,18 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
+  box-shadow: var(--shadow);
 }
 
 .glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  background: var(--surface);
   border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.brand-grad {
+  background: var(--brand-grad);
 }
 
 /* Range slider */
@@ -138,27 +155,27 @@ input[type="range"]::-webkit-slider-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--text);
-  border: 4px solid var(--ai);
+  background: #fff;
+  border: 5px solid var(--accent);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(60, 46, 30, 0.25);
 }
 input[type="range"]::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: var(--text);
-  border: 4px solid var(--ai);
+  background: #fff;
+  border: 5px solid var(--accent);
   cursor: pointer;
 }
 
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(139, 124, 246, 0.5); }
-  70% { box-shadow: 0 0 0 12px rgba(139, 124, 246, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(139, 124, 246, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(166, 121, 75, 0.45); }
+  70% { box-shadow: 0 0 0 12px rgba(166, 121, 75, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(166, 121, 75, 0); }
 }
 .pulse-ring {
-  animation: pulse-ring 2.4s infinite;
+  animation: pulse-ring 2.6s infinite;
 }
 
 .no-tap {

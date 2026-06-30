@@ -5,12 +5,10 @@ import { useUI } from "@/lib/ui";
 import { useFinance } from "@/lib/store";
 import { LifeEvent } from "@/lib/types";
 import {
-  PROFILE,
   projectNetWorth,
   healthScore,
   savingsRate,
   emergencyMonths,
-  netWorth,
   lifeEventInfo,
 } from "@/lib/financialModel";
 import { money, pct } from "@/lib/format";
@@ -24,7 +22,7 @@ function Delta({ base, now, fmt, goodUp = true }: { base: number; now: number; f
   const diff = now - base;
   const flat = Math.abs(diff) < 0.0001;
   const good = goodUp ? diff > 0 : diff < 0;
-  const color = flat ? "var(--text-muted)" : good ? "var(--accent)" : "var(--danger)";
+  const color = flat ? "var(--text-muted)" : good ? "var(--pos)" : "var(--danger)";
   return (
     <span className="text-[11px] font-semibold" style={{ color }}>
       {flat ? "no change" : `${diff > 0 ? "▲" : "▼"} ${fmt(Math.abs(diff))}`}
@@ -69,10 +67,10 @@ function Slider({
 
 export default function WhatIfSheet() {
   const { whatIfOpen, closeWhatIf } = useUI();
-  const { scenario, profile, setScenario, resetScenario, scenarioActive } = useFinance();
+  const { scenario, profile, base, setScenario, resetScenario, scenarioActive } = useFinance();
 
-  // baseline vs scenario metrics
-  const baseNW = projectNetWorth(PROFILE, HORIZON).at(-1)!.netWorth;
+  // baseline (the user's real numbers) vs scenario metrics
+  const baseNW = projectNetWorth(base, HORIZON).at(-1)!.netWorth;
   const scNW = projectNetWorth(profile, HORIZON).at(-1)!.netWorth;
 
   const metrics = [
@@ -85,21 +83,21 @@ export default function WhatIfSheet() {
     },
     {
       label: "Health score",
-      base: healthScore(PROFILE),
+      base: healthScore(base),
       now: healthScore(profile),
       fmt: (n: number) => `${Math.round(n)}`,
       goodUp: true,
     },
     {
       label: "Savings rate",
-      base: savingsRate(PROFILE),
+      base: savingsRate(base),
       now: savingsRate(profile),
       fmt: (n: number) => pct(n),
       goodUp: true,
     },
     {
       label: "Emergency cover",
-      base: emergencyMonths(PROFILE),
+      base: emergencyMonths(base),
       now: emergencyMonths(profile),
       fmt: (n: number) => `${n.toFixed(1)} mo`,
       goodUp: true,
@@ -118,7 +116,7 @@ export default function WhatIfSheet() {
             onClick={closeWhatIf}
           />
           <motion.div
-            className="absolute inset-x-0 bottom-0 z-50 rounded-t-[28px] border-t border-[var(--border-strong)] bg-[var(--bg-2)] max-h-[88%] flex flex-col"
+            className="absolute inset-x-0 bottom-0 z-50 rounded-t-[28px] border-t border-[var(--border-strong)] bg-[var(--phone-bg)] max-h-[88%] flex flex-col"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}

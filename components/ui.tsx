@@ -52,7 +52,7 @@ export function Pill({
     ai: "bg-[var(--ai-soft)] text-[var(--ai)]",
     warn: "bg-[var(--warn-soft)] text-[var(--warn)]",
     danger: "bg-[var(--danger-soft)] text-[var(--danger)]",
-    info: "bg-[rgba(77,166,255,0.15)] text-[var(--info)]",
+    info: "bg-[var(--info-soft)] text-[var(--info)]",
     muted: "bg-[var(--surface-2)] text-[var(--text-muted)]",
   };
   return (

@@ -15,7 +15,7 @@ export default function AIFab() {
     >
       <div className="pulse-ring flex h-14 w-14 items-center justify-center rounded-full shadow-xl active:scale-95 transition"
         style={{
-          background: "linear-gradient(135deg, var(--ai), #6D5BE0)",
+          background: "var(--brand-grad)",
         }}
       >
         <SparkleIcon width={26} height={26} style={{ color: "white" }} />

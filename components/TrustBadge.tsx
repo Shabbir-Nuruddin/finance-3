@@ -11,7 +11,7 @@ export default function TrustBadge({ trust }: { trust: Trust }) {
     conf === "High" ? "var(--accent)" : conf === "Medium" ? "var(--warn)" : "var(--text-muted)";
 
   return (
-    <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-2)] overflow-hidden">
+    <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between px-3 py-2"

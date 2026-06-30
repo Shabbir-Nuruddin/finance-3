@@ -94,6 +94,35 @@ export default function BudgetPage() {
             );
           })}
         </Card>
+
+        {/* Upcoming bills */}
+        <SectionTitle
+          title="Upcoming bills"
+          action={
+            <span className="text-[11px] text-[var(--text-muted)]">
+              {money(profile.bills.reduce((a, b) => a + b.amount, 0))} due soon
+            </span>
+          }
+        />
+        <Card className="divide-y divide-[var(--border)] p-0">
+          {profile.bills.map((b) => (
+            <div key={b.name} className="flex items-center gap-3 px-4 py-3">
+              <span className="text-[18px]">{b.icon}</span>
+              <div className="flex-1">
+                <p className="text-[14px] font-medium">{b.name}</p>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  Due in {b.dueInDays} days{" "}
+                  {b.autopay ? (
+                    <span style={{ color: "var(--pos)" }}>· autopay on</span>
+                  ) : (
+                    <span style={{ color: "var(--warn)" }}>· manual</span>
+                  )}
+                </p>
+              </div>
+              <p className="text-[14px] font-semibold">{money(b.amount)}</p>
+            </div>
+          ))}
+        </Card>
       </div>
     </div>
   );

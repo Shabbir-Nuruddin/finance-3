@@ -21,7 +21,7 @@ const TABS = [
 export default function BottomNav() {
   const path = usePathname();
   return (
-    <nav className="absolute bottom-0 left-0 right-0 z-30 px-2 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 bg-[rgba(8,11,18,0.82)] backdrop-blur-xl border-t border-[var(--border)]">
+    <nav className="absolute bottom-0 left-0 right-0 z-30 px-2 pb-[max(10px,env(safe-area-inset-bottom))] pt-2 bg-[rgba(251,248,243,0.9)] backdrop-blur-xl border-t border-[var(--border)]">
       <div className="flex items-stretch justify-between">
         {TABS.map(({ href, label, Icon }) => {
           const active = href === "/" ? path === "/" : path.startsWith(href);

@@ -48,11 +48,11 @@ export default function GoalsPage() {
                   </div>
                 </div>
                 <ProgressBar value={prog} tone={g.priority === "high" ? "ai" : "accent"} />
-                <div className="mt-2.5 flex items-start gap-1.5 rounded-lg bg-[var(--bg-2)] px-2.5 py-2">
+                <div className="mt-2.5 flex items-start gap-1.5 rounded-lg bg-[var(--surface-2)] px-2.5 py-2">
                   <span className="text-[12px]">💡</span>
                   <p className="text-[11.5px] text-[var(--text-muted)] leading-snug">
                     {g.id === "emergency" &&
-                      "Aria suggests auto-routing $150/mo here from your dining overspend to hit 6 months faster."}
+                      "Liam suggests auto-routing $150/mo here from your dining overspend to hit 6 months faster."}
                     {g.id === "home" &&
                       "Adding $200/mo would bring this goal forward by roughly 11 months."}
                     {g.id === "travel" &&

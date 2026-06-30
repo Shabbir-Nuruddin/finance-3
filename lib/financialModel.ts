@@ -237,8 +237,8 @@ export function healthScore(p: Profile): number {
 }
 
 export function healthGrade(score: number): { label: string; color: string } {
-  if (score >= 80) return { label: "Excellent", color: "var(--accent)" };
-  if (score >= 65) return { label: "Good", color: "var(--info)" };
+  if (score >= 80) return { label: "Excellent", color: "var(--pos)" };
+  if (score >= 65) return { label: "Good", color: "var(--pos)" };
   if (score >= 50) return { label: "Fair", color: "var(--warn)" };
   return { label: "Needs Work", color: "var(--danger)" };
 }

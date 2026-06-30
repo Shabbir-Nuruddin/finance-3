@@ -42,7 +42,7 @@ export function ScenarioBanner() {
       </button>
       <button
         onClick={resetScenario}
-        className="ml-2 shrink-0 rounded-full bg-[var(--bg-2)] px-3 py-1.5 text-[11px] font-semibold text-[var(--text-muted)]"
+        className="ml-2 shrink-0 rounded-full bg-[var(--surface)] px-3 py-1.5 text-[11px] font-semibold text-[var(--text-muted)]"
       >
         Reset
       </button>

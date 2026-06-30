@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import TrustBadge from "@/components/TrustBadge";
 import { Trust } from "@/lib/insights";
 import { SparkleIcon, SendIcon, CloseIcon } from "@/components/icons";
@@ -25,15 +25,31 @@ const SUGGESTIONS = [
 
 const ONBOARD = "I make $7,200/mo, want to buy a home in 4 years, and have some credit card debt.";
 
+/* Microphone icon */
+function MicIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+    </svg>
+  );
+}
+
 export default function PlannerPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [voiceHint, setVoiceHint] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
+
+  function showVoiceSoon() {
+    setVoiceHint(true);
+    setTimeout(() => setVoiceHint(false), 2600);
+  }
 
   async function ask(q: string) {
     const question = q.trim();
@@ -69,15 +85,12 @@ export default function PlannerPage() {
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-2 pb-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-2.5">
-          <span
-            className="flex h-9 w-9 items-center justify-center rounded-full"
-            style={{ background: "linear-gradient(135deg, var(--ai), #6D5BE0)" }}
-          >
+          <span className="flex h-9 w-9 items-center justify-center rounded-full brand-grad">
             <SparkleIcon width={19} height={19} style={{ color: "white" }} />
           </span>
           <div>
-            <h1 className="text-[17px] font-bold leading-none">Aria</h1>
-            <p className="text-[11px] text-[var(--accent)] mt-0.5">● Your AI financial planner</p>
+            <h1 className="text-[17px] font-bold leading-none">Liam</h1>
+            <p className="text-[11px] text-[var(--pos)] mt-0.5">● Your AI financial planner</p>
           </div>
         </div>
         <Link href="/" className="text-[var(--text-muted)] p-1">
@@ -87,29 +100,33 @@ export default function PlannerPage() {
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4" style={{ scrollbarWidth: "none" }}>
         {empty && (
-          <div className="pt-4">
-            <div
-              className="rounded-3xl p-5 text-center"
-              style={{ background: "var(--ai-soft)" }}
-            >
-              <span
-                className="inline-flex h-14 w-14 items-center justify-center rounded-2xl mb-3"
-                style={{ background: "linear-gradient(135deg, var(--ai), #6D5BE0)" }}
-              >
+          <div className="pt-2">
+            <div className="rounded-3xl p-5 text-center" style={{ background: "var(--accent-soft)" }}>
+              <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl mb-3 brand-grad">
                 <SparkleIcon width={28} height={28} style={{ color: "white" }} />
               </span>
               <h2 className="text-[18px] font-bold">Tell me about your money</h2>
               <p className="text-[13px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                In one sentence — your income, a goal, anything. I'll build a plan and answer in plain language.
-                Every answer shows the math behind it.
+                In one sentence — your income, a goal, anything. I&apos;ll build a plan and answer in
+                plain language. Every answer shows the math behind it.
               </p>
               <button
                 onClick={() => ask(ONBOARD)}
-                className="mt-4 w-full rounded-xl py-2.5 text-[13px] font-semibold text-white"
-                style={{ background: "linear-gradient(135deg, var(--ai), #6D5BE0)" }}
+                className="mt-4 w-full rounded-xl brand-grad py-2.5 text-[13px] font-semibold text-white"
               >
                 ✨ Try: “{ONBOARD}”
               </button>
+            </div>
+
+            {/* Offline-mode explainer (#5) */}
+            <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3.5">
+              <span className="text-[16px]">🔌</span>
+              <p className="text-[12px] text-[var(--text-muted)] leading-relaxed">
+                <span className="font-semibold text-[var(--text)]">Offline demo mode.</span> I answer
+                from your live data &amp; memory right now — and you can{" "}
+                <span className="font-semibold text-[var(--text)]">talk to me by voice</span> soon. Full
+                conversational AI is <span className="font-semibold text-[var(--accent)]">coming soon</span>.
+              </p>
             </div>
 
             <p className="text-[12px] text-[var(--text-muted)] mt-5 mb-2 px-1">Or ask me</p>
@@ -129,34 +146,23 @@ export default function PlannerPage() {
 
         {messages.map((m, i) =>
           m.role === "user" ? (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex justify-end"
-            >
-              <div className="max-w-[80%] rounded-2xl rounded-br-md px-4 py-2.5 text-[14px] text-white"
-                style={{ background: "linear-gradient(135deg, var(--ai), #6D5BE0)" }}>
+            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+              <div className="max-w-[80%] rounded-2xl rounded-br-md brand-grad px-4 py-2.5 text-[14px] text-white">
                 {m.text}
               </div>
             </motion.div>
           ) : (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-start"
-            >
+            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-start">
               <div className="flex items-center gap-1.5 mb-1">
-                <SparkleIcon width={13} height={13} style={{ color: "var(--ai)" }} />
-                <span className="text-[11px] font-semibold text-[var(--text-muted)]">Aria</span>
+                <SparkleIcon width={13} height={13} style={{ color: "var(--accent)" }} />
+                <span className="text-[11px] font-semibold text-[var(--text-muted)]">Liam</span>
                 {m.source === "rules" && (
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-dim)]">
                     offline mode
                   </span>
                 )}
               </div>
-              <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-[14px] leading-relaxed">
+              <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-[14px] leading-relaxed shadow-sm">
                 {m.text}
                 {m.trust && <TrustBadge trust={m.trust} />}
               </div>
@@ -166,12 +172,13 @@ export default function PlannerPage() {
 
         {loading && (
           <div className="flex items-center gap-1.5">
-            <SparkleIcon width={13} height={13} style={{ color: "var(--ai)" }} />
+            <SparkleIcon width={13} height={13} style={{ color: "var(--accent)" }} />
             <div className="flex gap-1 rounded-2xl bg-[var(--surface)] border border-[var(--border)] px-4 py-3">
               {[0, 1, 2].map((d) => (
                 <motion.span
                   key={d}
-                  className="h-2 w-2 rounded-full bg-[var(--ai)]"
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: "var(--accent)" }}
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
                 />
@@ -182,7 +189,19 @@ export default function PlannerPage() {
       </div>
 
       {/* Input */}
-      <div className="px-3 pb-3 pt-2 border-t border-[var(--border)]">
+      <div className="relative px-3 pb-3 pt-2 border-t border-[var(--border)]">
+        <AnimatePresence>
+          {voiceHint && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              className="absolute -top-9 left-3 rounded-full bg-[var(--text)] px-3 py-1.5 text-[11px] font-semibold text-[var(--phone-bg)] shadow"
+            >
+              🎙️ Voice chat is coming soon
+            </motion.div>
+          )}
+        </AnimatePresence>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -190,17 +209,29 @@ export default function PlannerPage() {
           }}
           className="flex items-center gap-2"
         >
+          {/* Voice button — visibly distinct, "coming soon" (#4) */}
+          <button
+            type="button"
+            onClick={showVoiceSoon}
+            aria-label="Voice chat (coming soon)"
+            className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-[var(--accent)] text-[var(--accent)]"
+            style={{ background: "var(--accent-soft)" }}
+          >
+            <MicIcon size={19} />
+            <span className="absolute -top-1.5 -right-1.5 rounded-full bg-[var(--accent)] px-1 py-px text-[7px] font-bold uppercase tracking-wide text-white">
+              soon
+            </span>
+          </button>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Aria anything about your money…"
-            className="flex-1 rounded-full bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-[14px] outline-none focus:border-[var(--ai)]"
+            placeholder="Ask Liam anything about your money…"
+            className="flex-1 rounded-full bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-[14px] outline-none focus:border-[var(--accent)]"
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full disabled:opacity-40"
-            style={{ background: "linear-gradient(135deg, var(--ai), #6D5BE0)" }}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full brand-grad disabled:opacity-40"
           >
             <SendIcon width={19} height={19} style={{ color: "white" }} />
           </button>

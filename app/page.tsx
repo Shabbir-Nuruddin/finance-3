@@ -47,8 +47,8 @@ export default function Dashboard() {
               <p className="text-[12px] text-[var(--text-muted)]">Net worth</p>
               <p className="text-[34px] font-bold leading-tight tracking-tight">{money(nw)}</p>
               <div className="flex items-center gap-1 mt-0.5">
-                <ArrowUp width={14} height={14} style={{ color: "var(--accent)" }} />
-                <span className="text-[12px] font-semibold" style={{ color: "var(--accent)" }}>
+                <ArrowUp width={14} height={14} style={{ color: "var(--pos)" }} />
+                <span className="text-[12px] font-semibold" style={{ color: "var(--pos)" }}>
                   {money(Math.abs(monthChange))} this month
                 </span>
               </div>
@@ -58,23 +58,23 @@ export default function Dashboard() {
                 <AreaChart data={spark} margin={{ top: 4, bottom: 0, left: 0, right: 0 }}>
                   <defs>
                     <linearGradient id="nwSpark" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.5} />
-                      <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+                      <stop offset="0%" stopColor="var(--pos)" stopOpacity={0.5} />
+                      <stop offset="100%" stopColor="var(--pos)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="v" stroke="var(--accent)" strokeWidth={2} fill="url(#nwSpark)" />
+                  <Area type="monotone" dataKey="v" stroke="var(--pos)" strokeWidth={2} fill="url(#nwSpark)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-[var(--bg-2)] p-3">
+            <div className="rounded-xl bg-[var(--surface-2)] p-3">
               <p className="text-[11px] text-[var(--text-muted)]">Assets</p>
-              <p className="text-[16px] font-bold" style={{ color: "var(--accent)" }}>
+              <p className="text-[16px] font-bold" style={{ color: "var(--pos)" }}>
                 {money(totalAssets(profile), { compact: true })}
               </p>
             </div>
-            <div className="rounded-xl bg-[var(--bg-2)] p-3">
+            <div className="rounded-xl bg-[var(--surface-2)] p-3">
               <p className="text-[11px] text-[var(--text-muted)]">Liabilities</p>
               <p className="text-[16px] font-bold" style={{ color: "var(--danger)" }}>
                 {money(totalLiabilities(profile), { compact: true })}
@@ -104,7 +104,7 @@ export default function Dashboard() {
             </Card>
             <Card className="py-3">
               <p className="text-[11px] text-[var(--text-muted)]">Free cash flow</p>
-              <p className="text-[17px] font-bold" style={{ color: freeCashFlow(profile) >= 0 ? "var(--accent)" : "var(--danger)" }}>
+              <p className="text-[17px] font-bold" style={{ color: freeCashFlow(profile) >= 0 ? "var(--pos)" : "var(--danger)" }}>
                 {money(freeCashFlow(profile), { sign: true })}
               </p>
             </Card>
@@ -113,7 +113,7 @@ export default function Dashboard() {
 
         {/* Proactive AI feed (#1) */}
         <SectionTitle
-          title="Aria noticed for you"
+          title="Liam noticed for you"
           action={
             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "var(--ai-soft)", color: "var(--ai)" }}>
               {alerts.length} proactive

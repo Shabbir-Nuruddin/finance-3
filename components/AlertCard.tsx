@@ -12,7 +12,7 @@ const TONE: Record<
   urgent: { ring: "var(--danger)", chip: "var(--danger-soft)", label: "Act now" },
   opportunity: { ring: "var(--accent)", chip: "var(--accent-soft)", label: "Opportunity" },
   win: { ring: "var(--accent)", chip: "var(--accent-soft)", label: "Win" },
-  info: { ring: "var(--info)", chip: "rgba(77,166,255,0.15)", label: "Heads up" },
+  info: { ring: "var(--info)", chip: "var(--info-soft)", label: "Heads up" },
 };
 
 export default function AlertCard({ insight }: { insight: Insight }) {
@@ -65,7 +65,7 @@ export default function AlertCard({ insight }: { insight: Insight }) {
           <button
             onClick={handleAction}
             className="mt-2.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold active:scale-95 transition"
-            style={{ background: tone.ring, color: "#06080d" }}
+            style={{ background: tone.ring, color: "#fff" }}
           >
             {insight.action} →
           </button>

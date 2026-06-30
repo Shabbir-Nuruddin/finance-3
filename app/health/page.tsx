@@ -92,8 +92,8 @@ export default function HealthPage() {
               <span
                 className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
                 style={{
-                  background: step.done ? "var(--accent)" : "var(--surface-2)",
-                  color: step.done ? "#06080d" : "var(--text-dim)",
+                  background: step.done ? "var(--pos)" : "var(--surface-2)",
+                  color: step.done ? "#fff" : "var(--text-dim)",
                 }}
               >
                 {step.done ? "✓" : i + 1}

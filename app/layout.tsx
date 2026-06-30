@@ -9,13 +9,13 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Aria — AI Wealth Planner",
+  title: "Liam — AI Wealth Planner",
   description:
     "An AI financial planner that watches your back, projects your future, and lets you stress-test life before it happens.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#070A12",
+  themeColor: "#FBF8F3",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

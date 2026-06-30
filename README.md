@@ -1,10 +1,10 @@
-# Aria — AI Wealth Planner
+# Liam — AI Wealth Planner
 
 A modern, AI-powered financial planning **mobile app** (mobile-formatted web app) built for the hackathon brief: help users manage finances, achieve goals, make smarter decisions, and build long-term wealth.
 
 ## Why this wins — 4 differentiators
 
-Most submissions are "a dashboard + a chatbot." Aria reframes what the app *is*:
+Most submissions are "a dashboard + a chatbot." Liam reframes what the app *is*:
 
 1. **🛡️ Proactive Agent (it watches your back).** The home feed surfaces specific, money-saving actions *before* you ask — cash-flow crunches, a credit card quietly costing you $627/yr, idle cash, missed autopay. *"Other apps wait for you to ask. Ours notices first."*
 2. **⏳ Financial Time Machine.** Scrub your net worth decades into the future and meet your future self, with AI narration of the consequences of today's choices. *"See the millionaire — or the regret — you're building today."*
@@ -58,7 +58,7 @@ Without a key the Planner uses the built-in fallback engine.
 
 ## 30-second demo script
 
-1. **Home** — point at the "Aria noticed for you" feed: the app is *already* working for you. Expand a "Why this?" badge → the Trust Layer.
+1. **Home** — point at the "Liam noticed for you" feed: the app is *already* working for you. Expand a "Why this?" badge → the Trust Layer.
 2. **Goals → Time Machine** — drag the slider to age 65, read the future-self note, show the "millionaire at age X" line.
 3. **Tap "What-If"** → choose **New baby** + drag spending up → watch net worth, health score, and savings rate update live. Then toggle **Pay off credit card** → score jumps.
 4. **AI Planner (FAB)** — tap the one-sentence onboarding, get a grounded plan with its math shown.

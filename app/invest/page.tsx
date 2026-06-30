@@ -102,7 +102,7 @@ export default function InvestPage() {
             <p className="text-[12.5px] text-[var(--text-muted)] leading-relaxed">
               Your portfolio's <span className="text-[var(--text)] font-semibold">{pct(weightedReturn / 100, 1)}</span> return
               and growth tilt fit a <span className="text-[var(--text)] font-semibold">long-horizon retirement goal</span> (36 years out).
-              For your <span className="text-[var(--text)] font-semibold">home down payment in 4 years</span>, Aria suggests shifting
+              For your <span className="text-[var(--text)] font-semibold">home down payment in 4 years</span>, Liam suggests shifting
               that portion toward lower-volatility bonds or HYSA so a market dip doesn't delay your purchase.
             </p>
           </div>
