@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useUI } from "@/lib/ui";
 import { useFinance } from "@/lib/store";
@@ -12,6 +13,7 @@ import {
   lifeEventInfo,
 } from "@/lib/financialModel";
 import { money, pct } from "@/lib/format";
+import Confetti from "./Confetti";
 import { CloseIcon, SlidersIcon } from "./icons";
 
 const HORIZON = 10;
@@ -73,6 +75,15 @@ export default function WhatIfSheet() {
   const baseNW = projectNetWorth(base, HORIZON).at(-1)!.netWorth;
   const scNW = projectNetWorth(profile, HORIZON).at(-1)!.netWorth;
 
+  // Celebrate meaningful health-score jumps (e.g. paying off the card).
+  const scoreNow = healthScore(profile);
+  const prevScore = useRef(scoreNow);
+  const [burst, setBurst] = useState(0);
+  useEffect(() => {
+    if (whatIfOpen && scoreNow - prevScore.current >= 4) setBurst((b) => b + 1);
+    prevScore.current = scoreNow;
+  }, [scoreNow, whatIfOpen]);
+
   const metrics = [
     {
       label: `Net worth in ${HORIZON}y`,
@@ -122,6 +133,7 @@ export default function WhatIfSheet() {
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 320 }}
           >
+            {burst > 0 && <Confetti key={burst} />}
             <div className="flex items-center justify-between px-5 pt-4 pb-3 shrink-0">
               <div className="flex items-center gap-2">
                 <span

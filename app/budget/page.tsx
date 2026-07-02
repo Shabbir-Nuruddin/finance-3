@@ -1,14 +1,14 @@
 "use client";
 
+import { Bar, BarChart, Cell, ResponsiveContainer, XAxis, Tooltip } from "recharts";
 import { useFinance } from "@/lib/store";
 import {
   monthlySpending,
   monthlyBudget,
   freeCashFlow,
-  sum,
 } from "@/lib/financialModel";
 import { proactiveAlerts } from "@/lib/insights";
-import { money, pct } from "@/lib/format";
+import { money } from "@/lib/format";
 import { Card, SectionTitle, ProgressBar, PageHeader } from "@/components/ui";
 import { SimulateButton } from "@/components/Simulate";
 import AlertCard from "@/components/AlertCard";
@@ -18,6 +18,22 @@ function budgetTone(amount: number, budget: number): "accent" | "warn" | "danger
   if (ratio > 1) return "danger";
   if (ratio >= 0.9) return "warn";
   return "accent";
+}
+
+// 6-month spending history, derived from the (possibly personalized /
+// simulated) current month — same pattern as the dashboard sparkline.
+const TREND_FACTORS = [1.08, 0.96, 1.02, 0.91, 1.05, 1];
+
+function trendData(current: number) {
+  const now = new Date();
+  return TREND_FACTORS.map((f, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (TREND_FACTORS.length - 1 - i), 1);
+    return {
+      month: d.toLocaleString("en-US", { month: "short" }),
+      spend: Math.round(current * f),
+      current: i === TREND_FACTORS.length - 1,
+    };
+  });
 }
 
 export default function BudgetPage() {
@@ -72,6 +88,45 @@ export default function BudgetPage() {
                 : `${money(budget - spent)} left this month`}
             </p>
           </div>
+        </Card>
+
+        {/* Spending trend */}
+        <SectionTitle title="Spending trend" />
+        <Card>
+          <div className="h-[110px] -mx-1">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={trendData(spent)} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fill: "var(--text-dim)" }}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(74,60,44,0.05)" }}
+                  contentStyle={{
+                    background: "var(--surface)",
+                    border: "1px solid var(--border-strong)",
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
+                  formatter={(v) => [money(Number(v)), "Spent"]}
+                />
+                <Bar dataKey="spend" radius={[6, 6, 0, 0]}>
+                  {trendData(spent).map((d, i) => (
+                    <Cell
+                      key={i}
+                      fill={d.current ? "var(--accent-deep)" : "var(--accent)"}
+                      opacity={d.current ? 1 : 0.45}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="mt-1 text-center text-[11px] text-[var(--text-muted)]">
+            {money(spent)} this month · 6-month view
+          </p>
         </Card>
 
         {/* Proactive savings opportunities */}

@@ -244,7 +244,43 @@ export function buildContextSummary(p: Profile): string {
   ].join(" ");
 }
 
-export function localFallbackAnswer(question: string, p: Profile): string {
+/* ---- Agentic chat actions — Liam's answers can drive the app ---- */
+
+export type ChatActionType =
+  | "whatif_payoff"
+  | "whatif_invest"
+  | "timemachine"
+  | "goals"
+  | "budget"
+  | "health";
+
+export type ChatAction = { type: ChatActionType; label: string };
+
+export const CHAT_ACTION_LABELS: Record<ChatActionType, string> = {
+  whatif_payoff: "⚡ Simulate paying off the card",
+  whatif_invest: "⚡ Simulate investing more",
+  timemachine: "⏳ Show my future",
+  goals: "🎯 See my goals",
+  budget: "💰 Review my budget",
+  health: "🛡️ Open Health Center",
+};
+
+export function chatAction(type: ChatActionType): ChatAction {
+  return { type, label: CHAT_ACTION_LABELS[type] };
+}
+
+/** Validate action ids coming back from the LLM against the allowed set. */
+export function sanitizeActions(raw: unknown): ChatAction[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((t): t is ChatActionType => typeof t === "string" && t in CHAT_ACTION_LABELS)
+    .slice(0, 2)
+    .map(chatAction);
+}
+
+export type FallbackReply = { answer: string; actions: ChatAction[] };
+
+export function localFallback(question: string, p: Profile): FallbackReply {
   const q = question.toLowerCase();
   const fcf = freeCashFlow(p);
 
@@ -260,17 +296,20 @@ export function localFallbackAnswer(question: string, p: Profile): string {
     const cc = p.debts.find((d) => d.name === "Credit Card");
     const home = p.goals.find((g) => g.id === "home");
     const interest = cc ? Math.round((cc.balance * cc.apr) / 100) : 0;
-    return `Great snapshot! Here's your starting plan. You're saving ${pct(
-      savingsRate(p),
-    )} of your income, which is a strong base. Three priorities: (1) clear your ${
-      cc
-        ? `${money(cc.balance)} credit card at ${cc.apr}% (it quietly costs ~${money(interest)}/yr)`
-        : "highest-rate debt"
-    }; (2) grow your emergency fund from ${emergencyMonths(p).toFixed(
-      1,
-    )} to 6 months; (3) keep funding your home down payment${
-      home ? ` (${money(home.current)} of ${money(home.target)}, ~on pace at ${money(home.monthly)}/mo)` : ""
-    }. Ask me about any one of these to go deeper.`;
+    return {
+      answer: `Great snapshot! Here's your starting plan. You're saving ${pct(
+        savingsRate(p),
+      )} of your income, which is a strong base. Three priorities: (1) clear your ${
+        cc
+          ? `${money(cc.balance)} credit card at ${cc.apr}% (it quietly costs ~${money(interest)}/yr)`
+          : "highest-rate debt"
+      }; (2) grow your emergency fund from ${emergencyMonths(p).toFixed(
+        1,
+      )} to 6 months; (3) keep funding your home down payment${
+        home ? ` (${money(home.current)} of ${money(home.target)}, ~on pace at ${money(home.monthly)}/mo)` : ""
+      }. Ask me about any one of these to go deeper.`,
+      actions: [chatAction("whatif_payoff"), chatAction("timemachine")],
+    };
   }
 
   // Overall standing / health score.
@@ -281,20 +320,26 @@ export function localFallbackAnswer(question: string, p: Profile): string {
     q.includes("net worth") ||
     q.includes("overall")
   ) {
-    return `Overall you're in solid shape: net worth ${money(
-      netWorth(p),
-    )} and a ${pct(savingsRate(p))} savings rate. Your score is held back by two things: an emergency fund at only ${emergencyMonths(
-      p,
-    ).toFixed(1)} months (aim for 6) and high credit-card utilization. Knock those out and your financial health jumps. The Health tab breaks down every factor.`;
+    return {
+      answer: `Overall you're in solid shape: net worth ${money(
+        netWorth(p),
+      )} and a ${pct(savingsRate(p))} savings rate. Your score is held back by two things: an emergency fund at only ${emergencyMonths(
+        p,
+      ).toFixed(1)} months (aim for 6) and high credit-card utilization. Knock those out and your financial health jumps. The Health tab breaks down every factor.`,
+      actions: [chatAction("health"), chatAction("whatif_payoff")],
+    };
   }
 
   if (q.includes("debt") || q.includes("credit") || q.includes("loan")) {
     const cc = p.debts.find((d) => d.name === "Credit Card");
-    return `Tackle debt highest-APR first (the "avalanche" method). Your credit card${
-      cc ? ` (${money(cc.balance)} at ${cc.apr}%)` : ""
-    } is the priority: that interest rate beats any likely investment return. After it's gone, roll that payment into your auto and student loans. With ${money(
-      fcf,
-    )}/mo of free cash flow, an extra ${money(300)}/mo could clear the card in under a year.`;
+    return {
+      answer: `Tackle debt highest-APR first (the "avalanche" method). Your credit card${
+        cc ? ` (${money(cc.balance)} at ${cc.apr}%)` : ""
+      } is the priority: that interest rate beats any likely investment return. After it's gone, roll that payment into your auto and student loans. With ${money(
+        fcf,
+      )}/mo of free cash flow, an extra ${money(300)}/mo could clear the card in under a year.`,
+      actions: [chatAction("whatif_payoff"), chatAction("health")],
+    };
   }
   if (
     q.includes("save") ||
@@ -304,34 +349,49 @@ export function localFallbackAnswer(question: string, p: Profile): string {
     q.includes("cushion") ||
     q.includes("rainy")
   ) {
-    return `Your emergency fund covers ${emergencyMonths(p).toFixed(
-      1,
-    )} months. Aim for 6. Automating ${money(
-      500,
-    )}/mo into a high-yield savings account closes the gap steadily without you thinking about it. Treat it like a fixed bill that pays your future self first.`;
+    return {
+      answer: `Your emergency fund covers ${emergencyMonths(p).toFixed(
+        1,
+      )} months. Aim for 6. Automating ${money(
+        500,
+      )}/mo into a high-yield savings account closes the gap steadily without you thinking about it. Treat it like a fixed bill that pays your future self first.`,
+      actions: [chatAction("goals"), chatAction("whatif_invest")],
+    };
   }
   if (q.includes("invest") || q.includes("portfolio") || q.includes("retire")) {
-    return `You're already investing ${money(
-      p.monthlyInvestContribution,
-    )}/mo, which is a strong habit. Your mix is well diversified across US and international stocks, bonds, gold, and real estate. For retirement, time in the market matters more than timing: at a 7% average return, steady contributions compound dramatically over decades. Open the Time Machine on the Goals tab to see your projected trajectory.`;
+    return {
+      answer: `You're already investing ${money(
+        p.monthlyInvestContribution,
+      )}/mo, which is a strong habit. Your mix is well diversified across US and international stocks, bonds, gold, and real estate. For retirement, time in the market matters more than timing: at a 7% average return, steady contributions compound dramatically over decades. Open the Time Machine on the Goals tab to see your projected trajectory.`,
+      actions: [chatAction("timemachine"), chatAction("whatif_invest")],
+    };
   }
   if (q.includes("house") || q.includes("home") || q.includes("buy")) {
     const home = p.goals.find((g) => g.id === "home");
-    return `Your home down-payment goal is ${money(home?.current ?? 0)} of ${money(
-      home?.target ?? 0,
-    )}. At ${money(
-      home?.monthly ?? 0,
-    )}/mo you're on track, but bumping contributions or trimming over-budget categories (dining, shopping) would pull the date forward. Try the What-If simulator to see exactly how much sooner.`;
+    return {
+      answer: `Your home down-payment goal is ${money(home?.current ?? 0)} of ${money(
+        home?.target ?? 0,
+      )}. At ${money(
+        home?.monthly ?? 0,
+      )}/mo you're on track, but bumping contributions or trimming over-budget categories (dining, shopping) would pull the date forward. Try the What-If simulator to see exactly how much sooner.`,
+      actions: [chatAction("whatif_invest"), chatAction("goals")],
+    };
   }
   if (q.includes("budget") || q.includes("spend")) {
     const over = p.expenses.filter((e) => e.amount > e.budget);
-    return `You're over budget in ${over.length} categories${
-      over.length ? `, biggest are ${over.slice(0, 2).map((e) => e.name).join(" and ")}` : ""
-    }. Redirecting that overspend to your goals is the fastest win. Your free cash flow is ${money(
-      fcf,
-    )}/mo, so there's real room to optimize.`;
+    return {
+      answer: `You're over budget in ${over.length} categories${
+        over.length ? `, biggest are ${over.slice(0, 2).map((e) => e.name).join(" and ")}` : ""
+      }. Redirecting that overspend to your goals is the fastest win. Your free cash flow is ${money(
+        fcf,
+      )}/mo, so there's real room to optimize.`,
+      actions: [chatAction("budget"), chatAction("whatif_invest")],
+    };
   }
-  return `Here's the big picture: net worth ${money(
-    netWorth(p),
-  )}, saving ${pct(savingsRate(p))} of your income, with a healthy investing habit. Your two highest-leverage moves right now are (1) clearing the high-interest credit card and (2) topping up your emergency fund to 6 months. Ask me about debt, saving, investing, or buying a home for a tailored plan.`;
+  return {
+    answer: `Here's the big picture: net worth ${money(
+      netWorth(p),
+    )}, saving ${pct(savingsRate(p))} of your income, with a healthy investing habit. Your two highest-leverage moves right now are (1) clearing the high-interest credit card and (2) topping up your emergency fund to 6 months. Ask me about debt, saving, investing, or buying a home for a tailored plan.`,
+    actions: [chatAction("whatif_payoff"), chatAction("timemachine")],
+  };
 }

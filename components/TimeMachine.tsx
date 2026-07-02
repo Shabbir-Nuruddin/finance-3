@@ -35,7 +35,18 @@ export default function TimeMachine() {
 
   const data = useMemo(() => projectNetWorth(profile, MAX), [profile]);
   const point = data[year];
-  const future = data.find((d) => d.netWorth >= 1_000_000);
+
+  // Wealth milestones on this trajectory (first age crossing each threshold).
+  const milestones = useMemo(() => {
+    const defs = [
+      { at: 100_000, icon: "🏁", label: "$100K" },
+      { at: 500_000, icon: "🚀", label: "$500K" },
+      { at: 1_000_000, icon: "🏆", label: "$1M" },
+    ];
+    return defs
+      .map((d) => ({ ...d, hit: data.find((pt) => pt.netWorth >= d.at) }))
+      .filter((d) => d.hit);
+  }, [data]);
 
   return (
     <div className="card p-4 overflow-hidden">
@@ -125,11 +136,21 @@ export default function TimeMachine() {
         </p>
       </div>
 
-      {future && (
-        <p className="mt-2.5 text-center text-[12px] text-[var(--text-muted)]">
-          🎯 On this path you become a millionaire at{" "}
-          <span className="font-bold text-[var(--accent)]">age {future.age}</span>
-        </p>
+      {milestones.length > 0 && (
+        <div className="mt-3 flex justify-center gap-2">
+          {milestones.map((m) => (
+            <div
+              key={m.label}
+              className="flex items-center gap-1.5 rounded-full bg-[var(--surface-2)] px-3 py-1.5"
+            >
+              <span className="text-[13px]">{m.icon}</span>
+              <span className="text-[11px] font-semibold">
+                {m.label}
+                <span className="text-[var(--text-muted)] font-medium"> · age {m.hit!.age}</span>
+              </span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

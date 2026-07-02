@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { PROFILE, netWorth, savingsRate, emergencyMonths } from "@/lib/financialModel";
-import { buildContextSummary, localFallbackAnswer } from "@/lib/insights";
+import { buildContextSummary, localFallback, sanitizeActions } from "@/lib/insights";
 import { money, pct } from "@/lib/format";
 import { Profile } from "@/lib/types";
 
@@ -15,8 +15,11 @@ Rules:
 - Keep answers to 3-5 short sentences.
 - You give educational guidance, not licensed financial advice.
 Respond ONLY with a valid JSON object, no markdown fences, in this exact shape:
-{"answer": string, "basis": string[], "confidence": "High" | "Medium" | "Low"}
-"basis" lists the 2-4 specific user numbers you relied on (e.g. "Credit card $2,850 at 22% APR").`;
+{"answer": string, "basis": string[], "confidence": "High" | "Medium" | "Low", "actions": string[]}
+"basis" lists the 2-4 specific user numbers you relied on (e.g. "Credit card $2,850 at 22% APR").
+"actions" is 0-2 in-app follow-ups the user should tap next, chosen ONLY from:
+"whatif_payoff" (simulate paying off the credit card), "whatif_invest" (simulate investing more),
+"timemachine" (net-worth projection), "goals", "budget", "health".`;
 
 function defaultBasis(p: Profile) {
   return [
@@ -67,13 +70,16 @@ export async function POST(req: NextRequest) {
   const key = process.env.ANTHROPIC_API_KEY;
 
   // Deterministic fallback — guarantees the demo always works.
-  const fallback = () =>
-    Response.json({
-      answer: localFallbackAnswer(question, profile),
+  const fallback = () => {
+    const reply = localFallback(question, profile);
+    return Response.json({
+      answer: reply.answer,
       basis: defaultBasis(profile),
       confidence: "High" as const,
+      actions: reply.actions,
       source: "rules",
     });
+  };
 
   if (!key) return fallback();
 
@@ -96,9 +102,10 @@ export async function POST(req: NextRequest) {
       .join("");
     const parsed = JSON.parse(extractJson(text));
     return Response.json({
-      answer: parsed.answer ?? localFallbackAnswer(question, profile),
+      answer: parsed.answer ?? localFallback(question, profile).answer,
       basis: Array.isArray(parsed.basis) && parsed.basis.length ? parsed.basis : defaultBasis(profile),
       confidence: parsed.confidence ?? "High",
+      actions: sanitizeActions(parsed.actions),
       source: "claude",
     });
   } catch {

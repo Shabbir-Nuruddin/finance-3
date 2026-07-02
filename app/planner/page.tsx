@@ -1,11 +1,21 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import TrustBadge from "@/components/TrustBadge";
-import { Trust } from "@/lib/insights";
+import {
+  Trust,
+  ChatAction,
+  ChatActionType,
+  chatAction,
+  proactiveAlerts,
+} from "@/lib/insights";
 import { useFinance } from "@/lib/store";
+import { useUI } from "@/lib/ui";
+import { netWorth, savingsRate, healthScore } from "@/lib/financialModel";
+import { money, pct } from "@/lib/format";
 import { SparkleIcon, SendIcon, CloseIcon } from "@/components/icons";
 
 type Msg = {
@@ -13,6 +23,10 @@ type Msg = {
   text: string;
   trust?: Trust;
   source?: string;
+  actions?: ChatAction[];
+  /** render fully without the typewriter effect (e.g. seeded greeting) */
+  instant?: boolean;
+  greeting?: boolean;
 };
 
 const SUGGESTIONS = [
@@ -36,23 +50,147 @@ function MicIcon({ size = 20 }: { size?: number }) {
   );
 }
 
+/* AI bubble with typewriter reveal; trust + action chips appear once typed. */
+function AiBubble({
+  m,
+  onAction,
+  onGrow,
+}: {
+  m: Msg;
+  onAction: (t: ChatActionType) => void;
+  onGrow: () => void;
+}) {
+  const [chars, setChars] = useState(m.instant ? m.text.length : 0);
+  const typed = chars >= m.text.length;
+
+  useEffect(() => {
+    if (typed) return;
+    const t = setTimeout(() => {
+      setChars((n) => Math.min(m.text.length, n + 3));
+      onGrow();
+    }, 16);
+    return () => clearTimeout(t);
+  }, [chars, typed, m.text.length, onGrow]);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-start">
+      <div className="flex items-center gap-1.5 mb-1">
+        <SparkleIcon width={13} height={13} style={{ color: "var(--accent)" }} />
+        <span className="text-[11px] font-semibold text-[var(--text-muted)]">Liam</span>
+        {m.source === "rules" && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-dim)]">
+            offline mode
+          </span>
+        )}
+      </div>
+      <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-[14px] leading-relaxed shadow-sm">
+        {m.text.slice(0, chars)}
+        {!typed && <span className="animate-pulse text-[var(--accent)]">▍</span>}
+        {typed && m.trust && <TrustBadge trust={m.trust} />}
+      </div>
+      {typed && !!m.actions?.length && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {m.actions.map((a) => (
+            <button
+              key={a.type}
+              onClick={() => onAction(a.type)}
+              className="rounded-full border px-3 py-2 text-[12px] font-semibold active:scale-95 transition"
+              style={{
+                borderColor: "var(--accent)",
+                background: "var(--accent-soft)",
+                color: "var(--accent-deep, var(--accent))",
+              }}
+            >
+              {a.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 export default function PlannerPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [voiceHint, setVoiceHint] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const openWhatIf = useUI((s) => s.openWhatIf);
+  const setScenario = useFinance((s) => s.setScenario);
   // The user's real numbers (personalized by onboarding if they did it), so
   // Liam's answers always match what's on screen.
   const base = useFinance((s) => s.base);
+  const personalized = useFinance((s) => s.personalized);
+
+  const scrollToEnd = useCallback(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
+  // If the user completed onboarding, Liam opens the conversation himself —
+  // grounded in their numbers, with the Trust Layer attached.
+  useEffect(() => {
+    if (!personalized || messages.length) return;
+    const first = base.name.split(" ")[0];
+    const top = proactiveAlerts(base)[0];
+    setMessages([
+      {
+        role: "ai",
+        instant: true,
+        greeting: true,
+        text: `Hey ${first}, I've looked over your numbers. Net worth ${money(
+          netWorth(base),
+        )}, saving ${pct(savingsRate(base))} of your income. One thing stands out: ${
+          top ? top.title.toLowerCase() : "you're in good shape"
+        }. Ask me anything, or tap a suggestion below.`,
+        trust: {
+          basis: [
+            `Net worth ${money(netWorth(base))}`,
+            `Savings rate ${pct(savingsRate(base))}`,
+            `Health score ${healthScore(base)}/100`,
+          ],
+          confidence: "High",
+        },
+        actions: top?.id === "creditcard" ? [chatAction("whatif_payoff"), chatAction("health")] : [chatAction("health"), chatAction("timemachine")],
+      },
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personalized]);
+
   function showVoiceSoon() {
     setVoiceHint(true);
     setTimeout(() => setVoiceHint(false), 2600);
+  }
+
+  // Agentic actions: Liam's answers can drive the app with state pre-loaded.
+  function handleAction(t: ChatActionType) {
+    switch (t) {
+      case "whatif_payoff":
+        setScenario({ payoffCreditCard: true });
+        openWhatIf();
+        router.push("/");
+        break;
+      case "whatif_invest":
+        setScenario({ extraInvest: 500 });
+        openWhatIf();
+        router.push("/");
+        break;
+      case "timemachine":
+      case "goals":
+        router.push("/goals");
+        break;
+      case "budget":
+        router.push("/budget");
+        break;
+      case "health":
+        router.push("/health");
+        break;
+    }
   }
 
   async function ask(q: string) {
@@ -70,7 +208,13 @@ export default function PlannerPage() {
       const data = await res.json();
       setMessages((m) => [
         ...m,
-        { role: "ai", text: data.answer, trust: { basis: data.basis, confidence: data.confidence }, source: data.source },
+        {
+          role: "ai",
+          text: data.answer,
+          trust: { basis: data.basis, confidence: data.confidence },
+          source: data.source,
+          actions: Array.isArray(data.actions) ? data.actions : [],
+        },
       ]);
     } catch {
       setMessages((m) => [
@@ -83,6 +227,7 @@ export default function PlannerPage() {
   }
 
   const empty = messages.length === 0;
+  const showSuggestions = empty || (messages.length === 1 && messages[0].greeting);
 
   return (
     <div className="flex flex-col h-full">
@@ -132,8 +277,26 @@ export default function PlannerPage() {
                 conversational AI is <span className="font-semibold text-[var(--accent)]">coming soon</span>.
               </p>
             </div>
+          </div>
+        )}
 
-            <p className="text-[12px] text-[var(--text-muted)] mt-5 mb-2 px-1">Or ask me</p>
+        {messages.map((m, i) =>
+          m.role === "user" ? (
+            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+              <div className="max-w-[80%] rounded-2xl rounded-br-md brand-grad px-4 py-2.5 text-[14px] text-white">
+                {m.text}
+              </div>
+            </motion.div>
+          ) : (
+            <AiBubble key={i} m={m} onAction={handleAction} onGrow={scrollToEnd} />
+          ),
+        )}
+
+        {showSuggestions && (
+          <div>
+            <p className="text-[12px] text-[var(--text-muted)] mt-1 mb-2 px-1">
+              {empty ? "Or ask me" : "Try asking"}
+            </p>
             <div className="space-y-2">
               {SUGGESTIONS.map((s) => (
                 <button
@@ -146,32 +309,6 @@ export default function PlannerPage() {
               ))}
             </div>
           </div>
-        )}
-
-        {messages.map((m, i) =>
-          m.role === "user" ? (
-            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-              <div className="max-w-[80%] rounded-2xl rounded-br-md brand-grad px-4 py-2.5 text-[14px] text-white">
-                {m.text}
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-start">
-              <div className="flex items-center gap-1.5 mb-1">
-                <SparkleIcon width={13} height={13} style={{ color: "var(--accent)" }} />
-                <span className="text-[11px] font-semibold text-[var(--text-muted)]">Liam</span>
-                {m.source === "rules" && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-dim)]">
-                    offline mode
-                  </span>
-                )}
-              </div>
-              <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-[14px] leading-relaxed shadow-sm">
-                {m.text}
-                {m.trust && <TrustBadge trust={m.trust} />}
-              </div>
-            </motion.div>
-          ),
         )}
 
         {loading && (
