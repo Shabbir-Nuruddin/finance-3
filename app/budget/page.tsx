@@ -13,6 +13,13 @@ import { Card, SectionTitle, ProgressBar, PageHeader } from "@/components/ui";
 import { SimulateButton } from "@/components/Simulate";
 import AlertCard from "@/components/AlertCard";
 
+function budgetTone(amount: number, budget: number): "accent" | "warn" | "danger" {
+  const ratio = amount / budget;
+  if (ratio > 1) return "danger";
+  if (ratio >= 0.9) return "warn";
+  return "accent";
+}
+
 export default function BudgetPage() {
   const { profile } = useFinance();
   const spent = monthlySpending(profile);
@@ -25,7 +32,7 @@ export default function BudgetPage() {
   return (
     <div>
       <div className="flex items-center justify-between pr-5">
-        <PageHeader title="Budget & Cash Flow" subtitle="Where it goes — and where to win" />
+        <PageHeader title="Budget & Cash Flow" subtitle="Where it goes, and where to win" />
         <SimulateButton />
       </div>
 
@@ -55,7 +62,15 @@ export default function BudgetPage() {
               <span>Spent {money(spent)}</span>
               <span>Budget {money(budget)}</span>
             </div>
-            <ProgressBar value={(spent / budget) * 100} tone={spent > budget ? "danger" : "accent"} />
+            <ProgressBar value={(spent / budget) * 100} tone={budgetTone(spent, budget)} />
+            <p
+              className="mt-1 text-[11px] font-medium"
+              style={{ color: spent > budget ? "var(--danger)" : "var(--accent)" }}
+            >
+              {spent > budget
+                ? `${money(spent - budget)} over budget`
+                : `${money(budget - spent)} left this month`}
+            </p>
           </div>
         </Card>
 
@@ -77,6 +92,7 @@ export default function BudgetPage() {
           {cats.map((c) => {
             const over = c.amount > c.budget;
             const ratio = (c.amount / c.budget) * 100;
+            const tone = budgetTone(c.amount, c.budget);
             return (
               <div key={c.name}>
                 <div className="flex items-center justify-between mb-1">
@@ -89,7 +105,10 @@ export default function BudgetPage() {
                     <span className="text-[var(--text-dim)] font-normal">/ {money(c.budget)}</span>
                   </span>
                 </div>
-                <ProgressBar value={Math.min(ratio, 100)} tone={over ? "danger" : "accent"} />
+                <ProgressBar value={Math.min(ratio, 100)} tone={tone} />
+                <p className="mt-1 text-[10.5px]" style={{ color: over ? "var(--danger)" : "var(--text-dim)" }}>
+                  {over ? `${money(c.amount - c.budget)} over` : `${money(c.budget - c.amount)} left`}
+                </p>
               </div>
             );
           })}

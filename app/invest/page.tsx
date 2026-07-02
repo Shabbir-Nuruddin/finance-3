@@ -6,13 +6,24 @@ import { investableAssets, sum } from "@/lib/financialModel";
 import { money, pct } from "@/lib/format";
 import { Card, SectionTitle, PageHeader, Pill } from "@/components/ui";
 
-const COLORS = ["#2DD4A7", "#4DA6FF", "#8B7CF6", "#F5A524", "#F4567B", "#22C7C7", "#6B7280"];
+const COLORS = [
+  "#2DD4A7",
+  "#4DA6FF",
+  "#8B7CF6",
+  "#F5A524",
+  "#F4567B",
+  "#22C7C7",
+  "#E0B33C",
+  "#7CA6E8",
+  "#C77DFF",
+  "#6B7280",
+];
 
 const EDU = [
   {
     icon: "📚",
     title: "Why diversification works",
-    body: "Spreading across US, international, and bonds smooths returns — when one zigs, another zags. Your mix already does this.",
+    body: "Spreading across US, international, and bonds smooths returns: when one zigs, another zags. Your mix already does this.",
   },
   {
     icon: "⏳",

@@ -56,9 +56,12 @@ Without a key the Planner uses the built-in fallback engine.
 3. (Optional) add `ANTHROPIC_API_KEY` in Vercel → Project → Settings → Environment Variables.
 4. Deploy. The submission link is the Vercel URL.
 
-## 30-second demo script
+## 45-second demo script
 
-1. **Home** — point at the "Liam noticed for you" feed: the app is *already* working for you. Expand a "Why this?" badge → the Trust Layer.
-2. **Goals → Time Machine** — drag the slider to age 65, read the future-self note, show the "millionaire at age X" line.
-3. **Tap "What-If"** → choose **New baby** + drag spending up → watch net worth, health score, and savings rate update live. Then toggle **Pay off credit card** → score jumps.
-4. **AI Planner (FAB)** — tap the one-sentence onboarding, get a grounded plan with its math shown.
+1. **Welcome screen** — two paths: "Explore the demo" (instant, guided tour) or "Set up my profile" (4-question onboarding that personalizes every number in the app, including Liam's answers).
+2. **Home** — point at the "Liam noticed for you" feed: the app is *already* working for you. Expand a "Why this?" badge → the Trust Layer. Tap an alert's action → it opens the What-If simulator pre-loaded with that fix.
+3. **Goals → Time Machine** — drag the slider to age 65, read the future-self note, show the "millionaire at age X" line.
+4. **Tap "What-If"** → choose **New baby** + drag spending up → watch net worth, health score, and savings rate update live. Then toggle **Pay off credit card** → score jumps.
+5. **AI Planner (bronze FAB)** — tap the one-sentence starter, get a grounded plan with its math shown. Note the voice button (coming soon) and offline-mode transparency.
+
+Lost? The **"?" button** replays the feature tour anytime.

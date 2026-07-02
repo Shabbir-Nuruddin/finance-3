@@ -133,7 +133,7 @@ export default function WhatIfSheet() {
                 <div>
                   <h3 className="text-[16px] font-bold leading-none">What-If Simulator</h3>
                   <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                    Stress-test your life — everything recalculates live
+                    Stress-test your life: everything recalculates live
                   </p>
                 </div>
               </div>

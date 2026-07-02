@@ -19,14 +19,14 @@ const MAX = 40;
 
 function narrate(age: number, year: number, nw: number, name: string): string {
   if (nw >= 1_000_000)
-    return `At ${age}, you're a millionaire. The boring, automatic habits you set today did this — not luck. Future ${name} is free to choose work, not forced into it.`;
+    return `At ${age}, you're a millionaire. The boring, automatic habits you set today did this, not luck. Future ${name} is free to choose work, not forced into it.`;
   if (nw >= 500_000)
-    return `By ${age} you've crossed half a million. Compounding has taken over — your money now earns more some years than you save. Stay the course.`;
+    return `By ${age} you've crossed half a million. Compounding has taken over: your money now earns more some years than you save. Stay the course.`;
   if (nw >= 250_000)
     return `At ${age}, a quarter-million net worth gives you real options: a home, a sabbatical, or simply sleeping well. This is what consistency buys.`;
   if (nw >= 100_000)
-    return `You hit six figures around ${age}. The first $100k is the hardest — from here the curve bends in your favor.`;
-  return `In ${year} years you're ${age}. Every extra dollar invested now is worth far more than later — this is your cheapest time to build wealth.`;
+    return `You hit six figures around ${age}. The first $100k is the hardest, from here the curve bends in your favor.`;
+  return `In ${year} years you're ${age}. Every extra dollar invested now is worth far more than later, this is your cheapest time to build wealth.`;
 }
 
 export default function TimeMachine() {

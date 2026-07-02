@@ -56,11 +56,11 @@ export default function GoalsPage() {
                     {g.id === "home" &&
                       "Adding $200/mo would bring this goal forward by roughly 11 months."}
                     {g.id === "travel" &&
-                      "On track — you'll have this funded well before your target date."}
+                      "On track: you'll have this funded well before your target date."}
                     {g.id === "education" &&
                       "Consider a 529 or high-yield account to grow this tax-efficiently."}
                     {g.id === "retirement" &&
-                      "Compounding does the heavy lifting — increasing 401(k) by 2% adds six figures by retirement."}
+                      "Compounding does the heavy lifting: increasing 401(k) by 2% adds six figures by retirement."}
                   </p>
                 </div>
               </Card>

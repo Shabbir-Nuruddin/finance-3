@@ -62,6 +62,11 @@ export const useFinance = create<State>((set, get) => ({
       amount: Math.round(e.amount * factor),
       budget: Math.round(e.budget * factor),
     }));
+    // Scale bills with spending so they stay consistent with the new budget.
+    const bills = src.bills.map((b) => ({
+      ...b,
+      amount: Math.round(b.amount * factor),
+    }));
     const goals = input.goalIds.length
       ? src.goals.filter((g) => input.goalIds.includes(g.id))
       : src.goals;
@@ -71,6 +76,7 @@ export const useFinance = create<State>((set, get) => ({
       name: input.name.trim() || src.name,
       monthlyIncome: Math.round(input.monthlyIncome),
       expenses,
+      bills,
       goals,
     };
     set({

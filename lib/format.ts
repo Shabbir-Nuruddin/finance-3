@@ -24,7 +24,7 @@ export function pct(n: number, digits = 0): string {
 }
 
 export function monthsToText(months: number): string {
-  if (!isFinite(months)) return "—";
+  if (!isFinite(months)) return "N/A";
   if (months <= 0) return "Reached 🎉";
   if (months < 12) return `${months} mo`;
   const y = Math.floor(months / 12);

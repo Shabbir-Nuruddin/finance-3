@@ -45,7 +45,7 @@ export function proactiveAlerts(p: Profile): Insight[] {
       body: `${next7.map((b) => b.name).join(", ")} are due. You'll have ${money(
         after,
       )} left in checking after they clear.`,
-      action: after < 1500 ? "Move funds from savings" : "You're covered — no action needed",
+      action: after < 1500 ? "Move funds from savings" : "You're covered, no action needed",
       trust: {
         basis: [
           `Checking balance ${money(checking)}`,
@@ -65,7 +65,7 @@ export function proactiveAlerts(p: Profile): Insight[] {
       severity: "urgent",
       icon: "💳",
       title: `Your credit card is costing you ${money(yearlyInterest)}/yr`,
-      body: `${money(cc.balance)} at ${cc.apr}% APR is your most expensive debt. Clearing it is a guaranteed ${cc.apr}% return — better than any investment.`,
+      body: `${money(cc.balance)} at ${cc.apr}% APR is your most expensive debt. Clearing it is a guaranteed ${cc.apr}% return, better than any investment.`,
       action: "Pay it off from savings",
       impact: `Save ${money(yearlyInterest)}/yr`,
       trust: {
@@ -111,7 +111,7 @@ export function proactiveAlerts(p: Profile): Insight[] {
       )}+ and dent your credit score.`,
       action: "Enable autopay",
       trust: {
-        basis: manual.map((b) => `${b.name} — due in ${b.dueInDays}d, manual`),
+        basis: manual.map((b) => `${b.name} (due in ${b.dueInDays}d, manual)`),
         confidence: "Medium",
       },
     });
@@ -157,7 +157,7 @@ export function actionPlan(p: Profile): ActionStep[] {
   if (cc && cc.balance > 0)
     steps.push({
       title: "Pay off the credit card",
-      detail: `Clear ${money(cc.balance)} at ${cc.apr}% APR — your highest-cost debt.`,
+      detail: `Clear ${money(cc.balance)} at ${cc.apr}% APR, your highest-cost debt.`,
       done: false,
       points: 8,
     });
@@ -222,7 +222,7 @@ export function riskFlags(p: Profile) {
     {
       label: "Income risk",
       level: "Moderate",
-      note: "Single income source — diversify if possible",
+      note: "Single income source, diversify if possible",
     },
   ] as { label: string; level: "Low" | "Moderate" | "Elevated"; note: string }[];
 }
@@ -260,11 +260,11 @@ export function localFallbackAnswer(question: string, p: Profile): string {
     const cc = p.debts.find((d) => d.name === "Credit Card");
     const home = p.goals.find((g) => g.id === "home");
     const interest = cc ? Math.round((cc.balance * cc.apr) / 100) : 0;
-    return `Great snapshot — here's your starting plan. You're saving ${pct(
+    return `Great snapshot! Here's your starting plan. You're saving ${pct(
       savingsRate(p),
     )} of your income, which is a strong base. Three priorities: (1) clear your ${
       cc
-        ? `${money(cc.balance)} credit card at ${cc.apr}% — it quietly costs ~${money(interest)}/yr`
+        ? `${money(cc.balance)} credit card at ${cc.apr}% (it quietly costs ~${money(interest)}/yr)`
         : "highest-rate debt"
     }; (2) grow your emergency fund from ${emergencyMonths(p).toFixed(
       1,
@@ -283,7 +283,7 @@ export function localFallbackAnswer(question: string, p: Profile): string {
   ) {
     return `Overall you're in solid shape: net worth ${money(
       netWorth(p),
-    )} and a ${pct(savingsRate(p))} savings rate. Your score is held back by two things — an emergency fund at only ${emergencyMonths(
+    )} and a ${pct(savingsRate(p))} savings rate. Your score is held back by two things: an emergency fund at only ${emergencyMonths(
       p,
     ).toFixed(1)} months (aim for 6) and high credit-card utilization. Knock those out and your financial health jumps. The Health tab breaks down every factor.`;
   }
@@ -292,7 +292,7 @@ export function localFallbackAnswer(question: string, p: Profile): string {
     const cc = p.debts.find((d) => d.name === "Credit Card");
     return `Tackle debt highest-APR first (the "avalanche" method). Your credit card${
       cc ? ` (${money(cc.balance)} at ${cc.apr}%)` : ""
-    } is the priority — that interest rate beats any likely investment return. After it's gone, roll that payment into your auto and student loans. With ${money(
+    } is the priority: that interest rate beats any likely investment return. After it's gone, roll that payment into your auto and student loans. With ${money(
       fcf,
     )}/mo of free cash flow, an extra ${money(300)}/mo could clear the card in under a year.`;
   }
@@ -306,14 +306,14 @@ export function localFallbackAnswer(question: string, p: Profile): string {
   ) {
     return `Your emergency fund covers ${emergencyMonths(p).toFixed(
       1,
-    )} months — aim for 6. Automating ${money(
+    )} months. Aim for 6. Automating ${money(
       500,
     )}/mo into a high-yield savings account closes the gap steadily without you thinking about it. Treat it like a fixed bill that pays your future self first.`;
   }
   if (q.includes("invest") || q.includes("portfolio") || q.includes("retire")) {
     return `You're already investing ${money(
       p.monthlyInvestContribution,
-    )}/mo, which is a strong habit. Your mix is well diversified across US, international, and bonds. For retirement, time in the market matters more than timing — at a 7% average return, steady contributions compound dramatically over decades. Open the Time Machine on the Goals tab to see your projected trajectory.`;
+    )}/mo, which is a strong habit. Your mix is well diversified across US and international stocks, bonds, gold, and real estate. For retirement, time in the market matters more than timing: at a 7% average return, steady contributions compound dramatically over decades. Open the Time Machine on the Goals tab to see your projected trajectory.`;
   }
   if (q.includes("house") || q.includes("home") || q.includes("buy")) {
     const home = p.goals.find((g) => g.id === "home");
@@ -326,7 +326,7 @@ export function localFallbackAnswer(question: string, p: Profile): string {
   if (q.includes("budget") || q.includes("spend")) {
     const over = p.expenses.filter((e) => e.amount > e.budget);
     return `You're over budget in ${over.length} categories${
-      over.length ? ` — biggest are ${over.slice(0, 2).map((e) => e.name).join(" and ")}` : ""
+      over.length ? `, biggest are ${over.slice(0, 2).map((e) => e.name).join(" and ")}` : ""
     }. Redirecting that overspend to your goals is the fastest win. Your free cash flow is ${money(
       fcf,
     )}/mo, so there's real room to optimize.`;

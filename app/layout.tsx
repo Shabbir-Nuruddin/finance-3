@@ -8,17 +8,35 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+const DESCRIPTION =
+  "An AI financial planner that watches your back, projects your future, and lets you stress-test life before it happens.";
+
 export const metadata: Metadata = {
-  title: "Liam — AI Wealth Planner",
-  description:
-    "An AI financial planner that watches your back, projects your future, and lets you stress-test life before it happens.",
+  title: "Liam: AI Wealth Planner",
+  description: DESCRIPTION,
+  applicationName: "Liam",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Liam",
+  },
+  openGraph: {
+    title: "Liam: AI Wealth Planner",
+    description: DESCRIPTION,
+    type: "website",
+    siteName: "Liam",
+  },
+  twitter: {
+    card: "summary",
+    title: "Liam: AI Wealth Planner",
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#FBF8F3",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({

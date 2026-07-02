@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { PROFILE, netWorth, savingsRate, emergencyMonths } from "@/lib/financialModel";
 import { buildContextSummary, localFallbackAnswer } from "@/lib/insights";
 import { money, pct } from "@/lib/format";
+import { Profile } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -17,12 +18,30 @@ Respond ONLY with a valid JSON object, no markdown fences, in this exact shape:
 {"answer": string, "basis": string[], "confidence": "High" | "Medium" | "Low"}
 "basis" lists the 2-4 specific user numbers you relied on (e.g. "Credit card $2,850 at 22% APR").`;
 
-function defaultBasis() {
+function defaultBasis(p: Profile) {
   return [
-    `Net worth ${money(netWorth(PROFILE))}`,
-    `Savings rate ${pct(savingsRate(PROFILE))}`,
-    `Emergency fund ${emergencyMonths(PROFILE).toFixed(1)} months`,
+    `Net worth ${money(netWorth(p))}`,
+    `Savings rate ${pct(savingsRate(p))}`,
+    `Emergency fund ${emergencyMonths(p).toFixed(1)} months`,
   ];
+}
+
+/** Accept the client's (possibly onboarding-personalized) profile so answers
+ *  match what the user sees on screen. Falls back to the seeded demo profile. */
+function sanitizeProfile(raw: unknown): Profile {
+  const p = raw as Profile | undefined;
+  const ok =
+    p &&
+    typeof p.monthlyIncome === "number" &&
+    isFinite(p.monthlyIncome) &&
+    Array.isArray(p.expenses) &&
+    Array.isArray(p.accounts) &&
+    Array.isArray(p.debts) &&
+    Array.isArray(p.goals) &&
+    Array.isArray(p.holdings) &&
+    Array.isArray(p.bills) &&
+    typeof p.name === "string";
+  return ok ? (p as Profile) : PROFILE;
 }
 
 function extractJson(text: string): string {
@@ -34,20 +53,24 @@ function extractJson(text: string): string {
 
 export async function POST(req: NextRequest) {
   let question = "";
+  let rawProfile: unknown;
   try {
-    ({ question } = await req.json());
+    const body = await req.json();
+    question = body.question;
+    rawProfile = body.profile;
   } catch {
     /* ignore */
   }
   question = (question || "").toString().slice(0, 500);
+  const profile = sanitizeProfile(rawProfile);
 
   const key = process.env.ANTHROPIC_API_KEY;
 
   // Deterministic fallback — guarantees the demo always works.
   const fallback = () =>
     Response.json({
-      answer: localFallbackAnswer(question, PROFILE),
-      basis: defaultBasis(),
+      answer: localFallbackAnswer(question, profile),
+      basis: defaultBasis(profile),
       confidence: "High" as const,
       source: "rules",
     });
@@ -56,7 +79,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const client = new Anthropic({ apiKey: key });
-    const ctx = buildContextSummary(PROFILE);
+    const ctx = buildContextSummary(profile);
     const msg = await client.messages.create({
       model: process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001",
       max_tokens: 700,
@@ -73,8 +96,8 @@ export async function POST(req: NextRequest) {
       .join("");
     const parsed = JSON.parse(extractJson(text));
     return Response.json({
-      answer: parsed.answer ?? localFallbackAnswer(question, PROFILE),
-      basis: Array.isArray(parsed.basis) && parsed.basis.length ? parsed.basis : defaultBasis(),
+      answer: parsed.answer ?? localFallbackAnswer(question, profile),
+      basis: Array.isArray(parsed.basis) && parsed.basis.length ? parsed.basis : defaultBasis(profile),
       confidence: parsed.confidence ?? "High",
       source: "claude",
     });

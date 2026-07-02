@@ -36,7 +36,7 @@ export type Holding = {
   value: number;
   weight: number; // %
   ret1y: number; // % return last year
-  kind: "stock" | "etf" | "bond" | "crypto" | "cash";
+  kind: "stock" | "etf" | "bond" | "crypto" | "commodity" | "reit" | "cash";
 };
 
 export type Bill = {

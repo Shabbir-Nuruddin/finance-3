@@ -8,7 +8,7 @@ const SLIDES = [
   {
     icon: "🛡️",
     title: "Liam watches your back",
-    body: "Your dashboard shows proactive insights — money issues and opportunities Liam spots before you ask. Tap any card to act on it.",
+    body: "Your dashboard shows proactive insights: money issues and opportunities Liam spots before you ask. Tap any card to act on it.",
     where: "Home tab",
   },
   {
@@ -20,7 +20,7 @@ const SLIDES = [
   {
     icon: "⚡",
     title: "Stress-test your life",
-    body: "Open the What-If simulator and drag sliders — lose a job, have a baby, invest more. Everything recalculates instantly.",
+    body: "Open the What-If simulator and drag sliders: lose a job, have a baby, invest more. Everything recalculates instantly.",
     where: "The “What-If” button, top of most screens",
   },
   {

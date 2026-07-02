@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import TrustBadge from "@/components/TrustBadge";
 import { Trust } from "@/lib/insights";
+import { useFinance } from "@/lib/store";
 import { SparkleIcon, SendIcon, CloseIcon } from "@/components/icons";
 
 type Msg = {
@@ -41,6 +42,9 @@ export default function PlannerPage() {
   const [loading, setLoading] = useState(false);
   const [voiceHint, setVoiceHint] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // The user's real numbers (personalized by onboarding if they did it), so
+  // Liam's answers always match what's on screen.
+  const base = useFinance((s) => s.base);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -61,7 +65,7 @@ export default function PlannerPage() {
       const res = await fetch("/api/planner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, profile: base }),
       });
       const data = await res.json();
       setMessages((m) => [
@@ -71,7 +75,7 @@ export default function PlannerPage() {
     } catch {
       setMessages((m) => [
         ...m,
-        { role: "ai", text: "I had trouble connecting, but I'm still here — try asking again.", source: "error" },
+        { role: "ai", text: "I had trouble connecting, but I'm still here. Try asking again.", source: "error" },
       ]);
     } finally {
       setLoading(false);
@@ -107,7 +111,7 @@ export default function PlannerPage() {
               </span>
               <h2 className="text-[18px] font-bold">Tell me about your money</h2>
               <p className="text-[13px] text-[var(--text-muted)] mt-1.5 leading-relaxed">
-                In one sentence — your income, a goal, anything. I&apos;ll build a plan and answer in
+                In one sentence: your income, a goal, anything. I&apos;ll build a plan and answer in
                 plain language. Every answer shows the math behind it.
               </p>
               <button
@@ -123,7 +127,7 @@ export default function PlannerPage() {
               <span className="text-[16px]">🔌</span>
               <p className="text-[12px] text-[var(--text-muted)] leading-relaxed">
                 <span className="font-semibold text-[var(--text)]">Offline demo mode.</span> I answer
-                from your live data &amp; memory right now — and you can{" "}
+                from your live data &amp; memory right now, and you can{" "}
                 <span className="font-semibold text-[var(--text)]">talk to me by voice</span> soon. Full
                 conversational AI is <span className="font-semibold text-[var(--accent)]">coming soon</span>.
               </p>
@@ -226,7 +230,7 @@ export default function PlannerPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask Liam anything about your money…"
-            className="flex-1 rounded-full bg-[var(--surface)] border border-[var(--border)] px-4 py-3 text-[14px] outline-none focus:border-[var(--accent)]"
+            className="flex-1 min-w-0 rounded-full bg-[var(--surface)] border border-[var(--border)] px-4 py-2.5 text-[16px] outline-none focus:border-[var(--accent)]"
           />
           <button
             type="submit"

@@ -23,9 +23,15 @@ export default function Onboarding() {
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("Alex");
-  const [income, setIncome] = useState(7200);
+  const [income, setIncomeRaw] = useState(7200);
   const [spending, setSpending] = useState(5400);
   const [goals, setGoals] = useState<string[]>(["emergency", "home", "retirement"]);
+
+  // Keep spending <= income even if the user goes back and lowers income.
+  const setIncome = (v: number) => {
+    setIncomeRaw(v);
+    setSpending((s) => Math.min(s, v));
+  };
 
   if (!onboardingOpen) return null;
 
@@ -134,7 +140,7 @@ export default function Onboarding() {
                   min={800}
                   max={Math.max(income, 2000)}
                   step={100}
-                  value={Math.min(spending, income)}
+                  value={spending}
                   onChange={(e) => setSpending(Number(e.target.value))}
                   className="mt-3"
                 />
@@ -142,7 +148,7 @@ export default function Onboarding() {
                   className="mt-5 text-center text-[14px] font-semibold"
                   style={{ color: savingsRate >= 15 ? "var(--pos)" : "var(--warn)" }}
                 >
-                  That&apos;s a {savingsRate}% savings rate {savingsRate >= 15 ? "💪" : "— room to grow"}
+                  That&apos;s a {savingsRate}% savings rate {savingsRate >= 15 ? "💪" : "(room to grow)"}
                 </p>
               </div>
             )}

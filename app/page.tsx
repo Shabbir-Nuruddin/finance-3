@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useFinance } from "@/lib/store";
 import {
@@ -20,6 +21,13 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 const HISTORY_FACTORS = [0.9, 0.925, 0.95, 0.962, 0.984, 1]; // 6-mo trend
 
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning,";
+  if (h < 18) return "Good afternoon,";
+  return "Good evening,";
+}
+
 export default function Dashboard() {
   const { profile } = useFinance();
   const nw = netWorth(profile);
@@ -27,13 +35,15 @@ export default function Dashboard() {
   const spark = HISTORY_FACTORS.map((f, i) => ({ i, v: Math.round(nw * f) }));
   const monthChange = nw - spark[spark.length - 2].v;
   const score = healthScore(profile);
+  const [hello, setHello] = useState("Good morning,");
+  useEffect(() => setHello(greeting()), []);
 
   return (
     <div>
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-2 pb-1">
         <div>
-          <p className="text-[13px] text-[var(--text-muted)]">Good morning,</p>
+          <p className="text-[13px] text-[var(--text-muted)]">{hello}</p>
           <h1 className="text-[24px] font-bold tracking-tight">{profile.name.split(" ")[0]} 👋</h1>
         </div>
         <SimulateButton />
@@ -121,7 +131,7 @@ export default function Dashboard() {
           }
         />
         <p className="px-1 -mt-1 mb-1 text-[12px] text-[var(--text-muted)]">
-          Your AI assistant watches your money and flags what matters — before you ask.
+          Your AI assistant watches your money and flags what matters, before you ask.
         </p>
         <div className="space-y-3">
           {alerts.map((a) => (
