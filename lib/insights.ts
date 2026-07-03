@@ -285,13 +285,13 @@ export function localFallback(question: string, p: Profile): FallbackReply {
   const fcf = freeCashFlow(p);
 
   // Onboarding-style intro ("I make $X, want to…") — synthesize a holistic starter plan.
+  // Only first-person income statements; generic "$X a month" questions fall through
+  // to their topic branch below.
   if (
     q.includes("i make") ||
     q.includes("i earn") ||
-    q.includes("/mo") ||
-    q.includes("a month") ||
-    q.includes("take home") ||
-    q.includes("my income")
+    q.includes("i take home") ||
+    q.includes("my income is")
   ) {
     const cc = p.debts.find((d) => d.name === "Credit Card");
     const home = p.goals.find((g) => g.id === "home");
